@@ -122,12 +122,42 @@ export class Enemy{
                 enemyBullet.destroy();
             })    
     };
+    livePack(){
+        let livepack=add([
+            "health",
+            pos(this.enemyObj.pos.x, this.enemyObj.pos.y),
+            sprite("healtPickup",{anim:"default"}),
+            scale(3),
+            area()
+        ])
+        livepack.onCollide("player",()=>{
+            livepack.destroy();
+        })
+        wait(4,()=>{
+            livepack.destroy();
+        })
+    }
     destroyEnemy(){
         this.enemyObj.onCollide("bulletPlayer",()=>{
             this.hits--
             if(this.hits===0){
                 if (this.onDeath) this.onDeath();
                 this.enemyObj.destroy();
+                let chanceToDrop=Math.floor(Math.random()*4);
+                if(chanceToDrop===1){
+                    this.livePack();
+                }
+            }
+        });
+        this.enemyObj.onCollide("player",()=>{
+            this.hits--
+            if(this.hits===0){
+                if (this.onDeath) this.onDeath();
+                this.enemyObj.destroy();
+                let chanceToDrop=Math.floor(Math.random()*4);
+                if(chanceToDrop===1){
+                    this.livePack();
+                }
             }
         });
     }

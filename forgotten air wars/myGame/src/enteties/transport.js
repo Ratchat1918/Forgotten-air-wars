@@ -24,12 +24,28 @@ export class Transport{
             scale(2),
         ])
     };
+    livePack(){
+        let livepack=add([
+            "health",
+            pos(this.transportObj.pos.x, this.transportObj.pos.y),
+            sprite("healtPickup",{anim:"default"}),
+            scale(3),
+            area()
+        ])
+        livepack.onCollide("player",()=>{
+            livepack.destroy();
+        })
+        wait(6,()=>{
+            livepack.destroy();
+        })
+    }
     destroyTransport(){
         this.transportObj.onCollide("bulletPlayer",()=>{
             this.hits--
             if(this.hits===0){
                 if (this.onDeath) this.onDeath();
                 this.transportObj.destroy();
+                this.livePack();
             }
         });
     }

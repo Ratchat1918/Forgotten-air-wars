@@ -25,6 +25,11 @@ export const loadPlayer=()=>{
 }
 export const loadPickUpables=()=>{
     loadSprite("healtPickup","src/sprites/healthPickup.png",{
-        sliceX:0, sliceY:10, anims:{default:{from:0,to:10,loop:true}}
+        sliceX:10, sliceY:0, anims:{default:{from:0,to:9,loop:true}}
     });
+}
+export const loadLevel1=()=>{
+    loadSprite("background1","src/sprites/level1/background1.png");
+    loadSprite("background2","src/sprites/level1/background2.png");
+    loadSprite("background3","src/sprites/level1/background3.png");
 }

@@ -1,10 +1,10 @@
 export class Player{
-    constructor(posX,posY,sprite, speed, lives, borderUp, borderDown, borderLeft, borderRight){
+    constructor(posX,posY,sprite, speed, borderUp, borderDown, borderLeft, borderRight){
         this.initialX=posX;
         this.initialY=posY;
         this.sprite=sprite
         this.currentSpeed=speed;
-        this.lives=lives;
+        this.lives=3;
         this.borderUp=borderUp;
         this.borderDown=borderDown;
         this.borderLeft=borderLeft;
@@ -84,7 +84,13 @@ export class Player{
                 go("gameover")
             }
         })
-        
+        this.playerObj.onCollide("health",()=>{
+            if(this.lives<3){
+                this.lives++;
+                livesUi.destroy()
+                createNewLivesUi(this.lives);
+            }
+        })
     }
     playerShoot(){
         let lastShotTime = 0;

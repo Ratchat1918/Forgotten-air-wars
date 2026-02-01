@@ -10,7 +10,13 @@ kaplay({
     letterbox:true,
     
 });
-debug.inspect=true;
+layers([
+        "staticBackground",
+        "background2",
+        "game",
+        "ui"
+    ],"game");
+//debug.inspect=true;
 const scenes={
     menu:()=>{
         mainMenu();
