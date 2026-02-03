@@ -1,10 +1,11 @@
 export class Player{
-    constructor(posX,posY,sprite, speed, borderUp, borderDown, borderLeft, borderRight){
+    constructor(posX,posY,sprite, speed,ammo, borderUp, borderDown, borderLeft, borderRight){
         this.initialX=posX;
         this.initialY=posY;
         this.sprite=sprite
         this.currentSpeed=speed;
         this.lives=3;
+        this.ammo=ammo;
         this.borderUp=borderUp;
         this.borderDown=borderDown;
         this.borderLeft=borderLeft;
@@ -17,7 +18,7 @@ export class Player{
     }
     makePlayer(){
         this.playerObj=add([
-            rect(100,64),
+            rect(100,80),
             color(0,0,0,0),
             anchor("center"),
             pos(this.initialX,this.initialY ),
@@ -26,78 +27,33 @@ export class Player{
             area(),
             opacity(0),
         ])
-        this.playerObj.add([
+        this.playerSprite=this.playerObj.add([
             sprite(this.sprite,{anim:"default"}),
             anchor("center"),
             scale(2)
         ])
     };
-    
-    playerDeath(){
-        let livesUi=add([
-            pos(800, 64),
-            sprite("lives",{frame:this.lives-1}),
-            scale(4),
-            anchor("center")
-        ])
-        const createNewLivesUi=(lives)=>{
-            if(lives>0){
-               let livesUi=add([
-                pos(800, 64),
-                sprite("lives",{frame:lives-1}),
-                scale(4),
-                anchor("center")
-            ]); 
-            }
-            };
-        this.playerObj.onCollide("enemy",()=>{
-            this.lives--;
-            createNewLivesUi(this.lives);
-            livesUi.destroy();
-            this.playerObj.sprite=sprite(this.sprite,{anim:"damage"});
-            
-            wait(3,()=>{
-                this.playerObj.sprite=sprite(this.sprite,{anim:"default"});
-            })
-            if(this.lives===0){
-                go("gameover")
-            }
-        })
-        this.playerObj.onCollide("transport",()=>{
-            this.lives--;
-            createNewLivesUi(this.lives);
-            livesUi.destroy();
-            this.playerObj.sprite=sprite(this.sprite,{anim:"damage"});
-            
-            wait(3,()=>{
-                this.playerObj.sprite=sprite(this.sprite,{anim:"default"});
-            })
-            if(this.lives===0){
-                go("gameover")
-            }
-        })
-        this.playerObj.onCollide("enemyBullet",()=>{
-            this.lives--;
-            livesUi.destroy()
-            createNewLivesUi(this.lives);
-            if(this.lives===0){
-                go("gameover")
-            }
-        })
-        this.playerObj.onCollide("health",()=>{
-            if(this.lives<3){
-                this.lives++;
-                livesUi.destroy()
-                createNewLivesUi(this.lives);
-            }
-        })
-    }
     playerShoot(){
         let lastShotTime = 0;
         const shootCooldown = 350; // milliseconds
+        let rateOfFire=0.04;
+        let bulletSpeed=-50;
+        let ammoFrame;
+        if(this.ammo===50){
+            ammoFrame=11;
+        }else{
+            ammoFrame=Math.floor(this.ammo*0.2)+1;
+        }
+        this.ammoUi=add([
+            pos(450, 900),
+            sprite("ammo",{frame:ammoFrame-1}),
+            scale(3),
+            anchor("center"),
+            layer("ui"),
+        ]);
         onKeyDown("space", () => {
             const now = Date.now();
-            if (now - lastShotTime >= shootCooldown) {
+            if (now - lastShotTime >= shootCooldown && this.ammo > 0) {
                 let bullet = add([
                     rect(100,10),
                     pos(this.playerObj.pos.x , this.playerObj.pos.y - 48),
@@ -113,24 +69,123 @@ export class Player{
                     scale(2),
                     anchor("center")
                 ])
-                tween(
-                    bullet.pos.y,
-                    -64-5,
-                    1,
-                    (val) => bullet.pos.y = val,
-                    easings.linear
-                );
+                play("playerShoot");
+                this.ammo--;
+                if(this.ammo===50){
+                    ammoFrame=11;
+                }else{
+                    ammoFrame=Math.floor(this.ammo*0.2)+1;
+                }
+                this.ammoUi.destroy();
+                this.ammoUi=add([
+                    pos(450, 900),
+                    sprite("ammo",{frame:ammoFrame-1}),
+                    scale(3),
+                    anchor("center"),
+                    layer("ui"),
+                ]);
+                loop(rateOfFire,()=>{
+                    bullet.moveBy(0,bulletSpeed);
+                })
                 bullet.onCollide("enemy",()=>{
                     bullet.destroy()
                 })
                 bullet.onCollide("transport",()=>{
                     bullet.destroy()
                 })
-                onDestroy("bulletPlayer",()=>{
+                bullet.onCollide("transport",()=>{
+                    bullet.destroy()
+                })
+                bullet.onCollide("borderUp",()=>{
+                    bullet.destroy();
                 })
                 lastShotTime = now;
             }
         });
+    }
+    playerDeath(){
+        let livesUi=add([
+            pos(800, 900),
+            sprite("lives",{frame:this.lives-1}),
+            scale(4),
+            anchor("center"),
+            layer("ui")
+        ])
+        const createNewLivesUi=(lives)=>{
+            if(lives>0){
+               livesUi=add([
+                pos(800, 900),
+                sprite("lives",{frame:lives-1}),
+                scale(4),
+                anchor("center")
+            ]);};
+        };
+        this.playerObj.onCollide("enemy",()=>{
+            this.playerSprite.play("damage");
+            wait(1,()=>{
+                this.playerSprite.play("default");
+            })
+            this.lives--;
+            livesUi.destroy();
+            createNewLivesUi(this.lives);
+            if(this.lives===0){
+                go("gameover")
+            }
+        })
+        this.playerObj.onCollide("transport",()=>{
+            this.playerSprite.play("damage");
+            wait(1,()=>{
+                this.playerSprite.play("default");
+            })
+            this.lives--;
+            livesUi.destroy();
+            createNewLivesUi(this.lives);
+            if(this.lives===0){
+                go("gameover")
+            }
+        })
+        this.playerObj.onCollide("enemyBullet",()=>{
+            this.playerSprite.play("damage");
+            wait(1,()=>{
+                this.playerSprite.play("default");
+            })
+            this.lives--;
+            livesUi.destroy();
+            createNewLivesUi(this.lives);
+            if(this.lives===0){
+                go("gameover")
+            }
+        })
+        this.playerObj.onCollide("healthPack",()=>{
+            if(this.lives<3){
+                this.lives++;
+                livesUi.destroy();
+                createNewLivesUi(this.lives);
+            }
+        })
+        this.playerObj.onCollide("ammoPack",()=>{
+            if(this.ammo<=40){
+                this.ammo+=10;
+                this.ammoUi.destroy();
+                this.ammoUi=add([
+                    pos(450, 900),
+                    sprite("ammo",{frame:Math.floor(this.ammo*0.2)+1-1}),
+                    scale(3),
+                    anchor("center"),
+                    layer("ui"),
+                ]);
+            }else if(this.ammo>40 && this.ammo<50){
+                this.ammo=50;
+                this.ammoUi.destroy();
+                this.ammoUi=add([
+                    pos(450, 900),
+                    sprite("ammo",{frame:11-1}),
+                    scale(3),
+                    anchor("center"),
+                    layer("ui"),
+                ]);
+            }
+        })
     }
     bulletCleanUp(){
         loop(2,()=>{

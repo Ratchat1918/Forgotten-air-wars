@@ -1,35 +1,48 @@
 export const loadGermans =()=>{
     loadSprite("bf109","src/sprites/level1/bf 109 Spain.png",{
-        sliceX:3, sliceY:2, anims:{default:{from:3,to:4,loop:true}, up:{from:0,to:1,loop:true}}
+        sliceX:3, sliceY:2, anims:{default:{from:0,to:1,loop:true}, damage:{from:1,to:3,loop:false}}
     });
     loadSprite("bf109white","src/sprites/level1/bf 109b white Spain.png",{
-        sliceX:3, sliceY:2, anims:{default:{from:3,to:4,loop:true}, up:{from:0,to:1,loop:true}}
+        sliceX:3, sliceY:2, anims:{default:{from:0,to:1,loop:true}, damage:{from:1,to:3,loop:false}}
     });
     loadSprite("bf109Bullet","src/sprites/level1/bf109Bullet.png");
 }
 export const loadItalians =()=>{
     loadSprite("sm81","src/sprites/level1/sm81 Italy.png",{
-        sliceX:3, sliceY:1, anims:{default:{from:0,to:1,loop:true}}
+        sliceX:3, sliceY:2, anims:{default:{from:0,to:1,loop:true}, damage:{from:1,to:3,loop:false}}
     });
     loadSprite("cr31","src/sprites/level1/cr31 Italy.png",{
-        sliceX:3, sliceY:2, anims:{default:{from:3,to:4,loop:true}, up:{from:0,to:1,loop:true}}
+        sliceX:3, sliceY:2, anims:{default:{from:0,to:1,loop:true}, damage:{from:1,to:3,loop:false}}
     });
     loadSprite("cr31Bullet","src/sprites/level1/cr31Bullet.png");
 }
 export const loadPlayer=()=>{
     loadSprite("i-16","src/sprites/level1/I-16 Spain.png",{
-        sliceX:3, sliceY:0, anims:{default:{from:0,to:1,loop:true}, damage:{from:0,to:2}}
+        sliceX:3, sliceY:2, anims:{default:{from:0,to:1,loop:true}, damage:{from:1,to:5,loop:false}}
     });
     loadSprite("i16Bullet","src/sprites/level1/i16 bullets.png");
-    loadSprite("lives","src/sprites/playerHealth.png",{sliceX:0, sliceY:3,});
 }
 export const loadPickUpables=()=>{
-    loadSprite("healtPickup","src/sprites/healthPickup.png",{
+    loadSprite("healthPickup","src/sprites/healthPickup.png",{
         sliceX:10, sliceY:0, anims:{default:{from:0,to:9,loop:true}}
+    });
+    loadSprite("ammoPickUp","src/sprites/ammoPickup.png",{
+        sliceX:3, sliceY:2, anims:{default:{from:0,to:5,loop:true}}
     });
 }
 export const loadLevel1=()=>{
-    loadSprite("background1","src/sprites/level1/background1.png");
-    loadSprite("background2","src/sprites/level1/background2.png");
-    loadSprite("background3","src/sprites/level1/background3.png");
+    loadSprite("staticBG","src/sprites/level1/staticBG.png");
+    loadSprite("cloudsBG","src/sprites/level1/cloudsBG.png");
+    loadSprite("greeneryBG","src/sprites/level1/greeneryBG.png");
+}
+export const loadUi=()=>{
+    loadFont("yoster","src/fonts/yoster.ttf");
+    loadSprite("lives","src/sprites/playerHealth.png",{sliceX:0, sliceY:3,});
+    loadSprite("ammo","src/sprites/ammo.png",{sliceX:0, sliceY:11,});
+}
+export const loadSfx=()=>{
+    loadSound("fighterDie","/src/sounds/fighterDie.mp3");
+    loadSound("bomberDie","/src/sounds/bomberDie.wav");
+    loadSound("enemyHit","src/sounds/enemyHit.wav");
+    loadSound("playerShoot","src/sounds/playerShoot.wav");
 }

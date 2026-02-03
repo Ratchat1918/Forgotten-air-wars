@@ -9,7 +9,7 @@ export const level1=()=>{
     loadGermans();
     loadItalians();
     loadPickUpables();
-    const maxEnemies=5;
+    const maxEnemies=8;
     let currentEnemies=0;
     let borderDown=add([
         rect(960,1),
@@ -19,10 +19,23 @@ export const level1=()=>{
         ]);
     let borderUp=add([
         rect(960,1),
-        pos(0, -64),
+        pos(0, -96),
         area(),
         "borderUp"
     ]);
+    let borderUpPlayer=add([
+        rect(960,1),
+        pos(0, 0),
+        area(),
+        "borderUpPlayer"
+    ]);
+    let borderDownPlayer=add([
+        rect(960,1),
+        pos(0, 890),
+        opacity(0),
+        area(),
+        "borderDownPlayer"
+        ]);
     let borderLeft=add([
         rect(1,960),
         pos(0,0),
@@ -36,58 +49,68 @@ export const level1=()=>{
         "borderRight"
     ]);
     const renderBackground=()=>{//infinite parallax background:]]]]
-        let staticBackground=add([
-            sprite("background1"),
-            "staticBackground",
-            scale(),
+        let staticBG=add([
+            sprite("staticBG"),
+            "staticBG",
+            scale(2),
             pos(0,0),
             layer("staticBackground")
         ]);
-        let background2=add([
-            sprite("background2"),
-            "background2",
-            scale(),
+        let cloudsBG=add([
+            sprite("cloudsBG"),
+            "cloudsBG",
+            scale(2),
             pos(0,0),
-            layer("background2")
+            layer("background3")
         ]);
-        let background3=add([
-            sprite("background3"),
-            "background3",
-            scale(),
+        let cloudsBG2=add([
+            sprite("cloudsBG"),
+            "cloudsBG",
+            scale(2),
+            pos(0,-960),
+            layer("background3")
+        ]);
+        let greeneryBG=add([
+            sprite("greeneryBG"),
+            "greeneryBG",
+            scale(2),
             pos(0,-960),
             layer("background2")
         ]);
-        loop(0.1,()=>{
-            if(background2.pos.y>=960){
-                background2.destroy();
-                background2 = add([
-                    sprite("background2"),
-                    "background2",
-                    scale(),
+        loop(0.04,()=>{
+            if(cloudsBG.pos.y>=960){
+                cloudsBG.destroy();
+                cloudsBG = add([
+                    sprite("cloudsBG"),
+                    "cloudsBG",
+                    scale(2),
                     pos(0,-960),
                     layer("background2")
                 ]);
             }
-            if(background3.pos.y>=960){
-                background3.destroy();
-                background3 = add([
-                    sprite("background3"),
-                    "background3",
-                    scale(),
+            if(greeneryBG.pos.y>=960){
+                greeneryBG.destroy();
+                greeneryBG = add([
+                    sprite("greeneryBG"),
+                    "greeneryBG",
+                    scale(2),
                     pos(0,-960),
                     layer("background2")
                 ]);
             }
-            background2.moveBy(0,10);
-            background3.moveBy(0,10);
+
+            cloudsBG.moveBy(0,6);
+            cloudsBG2.moveBy(0,6);
+            greeneryBG.moveBy(0,4);
         });
     }
     renderBackground();
-    const player = new Player(480,480,"i-16",5, borderUp, borderDown, borderLeft, borderRight);//x, y, sprite, speed
+    const player = new Player(480,480,"i-16",5, 50, borderUpPlayer, borderDownPlayer, borderLeft, borderRight);//x, y, sprite, speed
     let scoreNumber=0;
     let score=add([
-        pos(32,32),
-        text(`Score: ${scoreNumber}`)
+        pos(32,900),
+        text(`Score: ${scoreNumber}`,{font:"yoster", size:32}),
+        layer("ui"),
     ]);
 
     function increaseScore(amount = 100) {
@@ -104,49 +127,79 @@ export const level1=()=>{
     onDestroy("transport",()=>{
         currentEnemies--;
     })
-    const spawnEnemyFighter=()=>{
-        let enemyKind = Math.floor(Math.random()*8);
-        let enemyPosX=Math.floor(Math.random()*(800-100)+100);
-        let enemyPosY = 0+32;
-        let enemyPosYDown = 960-32;
-        switch (enemyKind) {
+    const spawnAmmoPack=()=>{
+        let ammoPack=add([
+            "ammoPack",
+            pos(Math.floor(Math.random()*800), Math.floor(Math.random()*600)),
+            sprite("ammoPickUp",{anim:"default"}),
+            area()])
+            ammoPack.onCollide("player",()=>{
+                ammoPack.destroy();})
+            wait(6,()=>{
+                ammoPack.destroy();});};
+    const spawnEnemies=()=>{
+        let spawnIndex = Math.floor(Math.random()*10);
+        let spriteIndex;
+        let directionIndex;
+        switch(spawnIndex){
             case 1:
-                new Enemy(enemyPosX,enemyPosY,"bf109white",  3, "down", increaseScore);
+                spriteIndex=Math.floor(Math.random()*3);
+                directionIndex=Math.floor(Math.random()*2);
+                new Enemy(100,spriteIndex,directionIndex, increaseScore)//pos x, sprite index, direction, onDeath function
                 currentEnemies++;
                 break;
             case 2:
-                new Enemy(enemyPosX,enemyPosY,"bf109", 3, "down", increaseScore);
+                spriteIndex=Math.floor(Math.random()*3);
+                directionIndex=Math.floor(Math.random()*2);
+                new Enemy(200,spriteIndex,directionIndex, increaseScore)//pos x, sprite index, direction, onDeath function
                 currentEnemies++;
                 break;
             case 3:
-                new Enemy(enemyPosX,enemyPosY,"bf109white",  3, "down", increaseScore);
+                spriteIndex=Math.floor(Math.random()*3);
+                directionIndex=Math.floor(Math.random()*2);
+                new Enemy(300,spriteIndex,directionIndex, increaseScore)
                 currentEnemies++;
                 break;
             case 4:
-                new Enemy(enemyPosX,enemyPosYDown,"bf109", 3, "up", increaseScore);
+                spriteIndex=Math.floor(Math.random()*3);
+                directionIndex=Math.floor(Math.random()*2);
+                new Enemy(420,spriteIndex,directionIndex, increaseScore)
                 currentEnemies++;
                 break;
             case 5:
-                new Enemy(enemyPosX,enemyPosYDown,"cr31", 2, "up", increaseScore);
+                spriteIndex=Math.floor(Math.random()*3);
+                directionIndex=Math.floor(Math.random()*2);
+                new Enemy(520,spriteIndex,directionIndex, increaseScore)
                 currentEnemies++;
                 break;
             case 6:
-                new Enemy(enemyPosX,enemyPosY,"cr31", 2, "down", increaseScore);
+                spriteIndex=Math.floor(Math.random()*3);
+                directionIndex=Math.floor(Math.random()*2);
+                new Enemy(620,spriteIndex,directionIndex, increaseScore)
                 currentEnemies++;
                 break;
             case 7:
-                new Transport("sm81", 5, increaseScoreTransport);
+                spriteIndex=Math.floor(Math.random()*3);
+                directionIndex=Math.floor(Math.random()*2);
+                new Enemy(720,spriteIndex,directionIndex, increaseScore)
                 currentEnemies++;
                 break;
-            default:
+            case 8:
+                directionIndex=Math.floor(Math.random()*2);
+                new Transport(320, directionIndex, increaseScoreTransport);
+                currentEnemies++;
                 break;
-        };
+            case 9:
+                spawnAmmoPack();
+                break;
+            default:
+                break
+        }
     };
     let interval=3;
     loop(interval,()=>{
-        
         if(currentEnemies<maxEnemies){
-            spawnEnemyFighter();
+            spawnEnemies();
         }
         if(scoreNumber>=700){
             interval=2;

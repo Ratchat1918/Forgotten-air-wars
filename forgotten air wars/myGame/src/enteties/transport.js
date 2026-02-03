@@ -1,15 +1,26 @@
 export class Transport{
-    constructor(sprite, hits, onDeath){
-        this.initialX=Math.floor(Math.random()*(600-300)+300);
-        this.initialY=-128;
-        this.sprite=sprite;
-        this.hits=hits;
+    constructor(posX,direction,onDeath){
+        this.initialX=posX;
+        this.initialY;
+        this.sprite="sm81";
+        this.hits=4;
         this.onDeath = onDeath;
-        this.makeTransport();
-        this.transportMoveDown();
+        this.direction=direction;
+        let animationFlip;
+        if(this.direction===0){
+            this.initialY=0;
+            animationFlip=true;
+            this.makeTransport(animationFlip);
+            this.transportMoveDown();
+        }else{
+            this.initialY=960;
+            animationFlip=false;
+            this.makeTransport(animationFlip);
+            this.transportMoveUp();
+        }
         this.destroyTransport();
     };
-    makeTransport(){
+    makeTransport(animationFlip){
         this.transportObj=add([
             rect(256,128),
             anchor("center"),
@@ -18,17 +29,17 @@ export class Transport{
             opacity(0),
             area(),
         ]);
-        this.transportObj.add([
-            sprite(this.sprite,{anim:"default"}),
+        this.transportSprite=this.transportObj.add([
+            sprite(this.sprite,{anim:"default", flipY:animationFlip}),
             anchor("center"),
             scale(2),
         ])
     };
     livePack(){
         let livepack=add([
-            "health",
+            "healthPack",
             pos(this.transportObj.pos.x, this.transportObj.pos.y),
-            sprite("healtPickup",{anim:"default"}),
+            sprite("healthPickup",{anim:"default"}),
             scale(3),
             area()
         ])
@@ -39,13 +50,49 @@ export class Transport{
             livepack.destroy();
         })
     }
+    ammoPack(){
+        let ammoPack=add([
+            "ammoPack",
+            pos(this.transportObj.pos.x+50, this.transportObj.pos.y),
+            sprite("ammoPickUp",{anim:"default"}),
+            area()
+        ])
+        ammoPack.onCollide("player",()=>{
+            ammoPack.destroy();
+        })
+        wait(6,()=>{
+            ammoPack.destroy();
+        })
+    }
     destroyTransport(){
         this.transportObj.onCollide("bulletPlayer",()=>{
+            this.transportSprite.play("damage");
+            wait(1,()=>{
+                this.transportSprite.play("default");
+            })
+            play("enemyHit");
             this.hits--
             if(this.hits===0){
+                play("bomberDie");
                 if (this.onDeath) this.onDeath();
                 this.transportObj.destroy();
                 this.livePack();
+                this.ammoPack();
+            }
+        });
+        this.transportObj.onCollide("player",()=>{
+            this.transportSprite.play("damage");
+            wait(1,()=>{
+                this.transportSprite.play("default");
+            })
+            play("enemyHit");
+            this.hits--
+            if(this.hits===0){
+                play("bomberDie");
+                if (this.onDeath) this.onDeath();
+                this.transportObj.destroy();
+                this.livePack();
+                this.ammoPack();
             }
         });
     }
@@ -64,7 +111,34 @@ export class Transport{
         startTween();
         this.transportObj.onCollide("borderDown",()=>{
             this.transportObj.pos.y = 0;
-            this.transportObj.pos.x = Math.floor(Math.random() * (800 - 100) + 100);
+            if(this.transportObj.pos.x>=820){
+                this.transportObj.pos.x=100;
+            }else{
+                this.transportObj.pos.x+=100;
+            };
+            startTween(); // Restart movement after respawn
+        });
+    }
+    transportMoveUp(){
+        const startTween = () => {
+            if(this.hits>0){
+                tween(
+                    this.transportObj.pos.y,
+                    -128,
+                    14,
+                    (val) => this.transportObj.pos.y = val,
+                    easings.linear
+                );
+            }
+        };
+        startTween();
+        this.transportObj.onCollide("borderUp",()=>{
+            this.transportObj.pos.y = 960;
+            if(this.transportObj.pos.x>=820){
+                this.transportObj.pos.x=100;
+            }else{
+                this.transportObj.pos.x+=100;
+            };
             startTween(); // Restart movement after respawn
         });
     }

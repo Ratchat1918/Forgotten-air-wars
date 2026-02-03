@@ -1,17 +1,24 @@
 export class Enemy{
-    constructor(posX,posY,sprite, hits, direction, onDeath){
-        this.initialX=posX;
-        this.initialY=posY;
-        this.sprite=sprite;
-        this.hits=hits;
-        this.direction=direction;
+    constructor(posX,spriteIndex, directionIndex, onDeath){//direction 1 is up 0 is down
+        this.hits=3;
+        this.direction=directionIndex;
         this.onDeath = onDeath;
-        this.bulletSprite;
-        if(this.direction==="down"){
-            this.makeEnemy("default");
+        this.initialX=posX;
+        this.initialY;
+        this.spriteList=["bf109","bf109white","cr31"];
+        this.bulletSpriteList=["bf109Bullet","bf109Bullet","cr31Bullet"];
+        this.sprite=this.spriteList[spriteIndex];
+        this.bulletSprite=this.bulletSpriteList[spriteIndex];
+        let animationFlip;
+        if(this.direction===0){
+            this.initialY=0;
+            animationFlip=true;
+            this.makeEnemy(animationFlip);
             this.enemyMovementDown();
         }else{
-            this.makeEnemy("up");
+            this.initialY=960;
+            animationFlip=false;
+            this.makeEnemy(animationFlip);
             this.enemyMovementUp();
         }
         this.destroyEnemy();
@@ -21,7 +28,7 @@ export class Enemy{
             let shootChance=Math.floor(Math.random()*4);
             if(this.enemyObj.exists()){
                 if(shootChance===1||shootChance===2){
-                  this.enemyShoot();  
+                  this.enemyShoot(animationFlip);  
                 }
             }
         });
@@ -29,14 +36,17 @@ export class Enemy{
         switch(this.sprite){
             case "bf109":
                 this.speed=3;
+                this.hits=3;
                 this.bulletSprite="bf109Bullet";
                 break;
             case "bf109white":
                 this.speed=2.5;
+                this.hits=3;
                 this.bulletSprite="bf109Bullet";
                 break;
             default:
                 this.speed=1.5;
+                this.hits=2;
                 this.bulletSprite="cr31Bullet";
         }
     };
@@ -49,7 +59,7 @@ export class Enemy{
             });
         });
     }
-    makeEnemy(animation){
+    makeEnemy(animationFlip){
         this.enemyObj=add([
             rect(100,64),
             anchor("center"),
@@ -58,59 +68,40 @@ export class Enemy{
             opacity(0),
             area(),
         ]);
-        this.enemyObj.add([
-            sprite(this.sprite,{anim:animation}),
+        this.enemySprite=this.enemyObj.add([
+            sprite(this.sprite,{anim:"default", flipY:animationFlip}),
             anchor("center"),
             scale(2),
         ])
     };
-    enemyShoot(){
-        let BulletOffset=32;
-        let bulletSpeed=3.5;
+    enemyShoot(animationFlip){
+        let rateOfFire=0.02;
         let enemyBullet = add([
             rect(10,10),
                 pos(this.enemyObj.pos.x, this.enemyObj.pos.y),
                 area(),
-                body(),
                 opacity(0),
                 "enemyBullet",
             ]);
-            if(this.direction==="down"){
-                enemyBullet.add([
+            enemyBullet.add([
                 sprite(this.bulletSprite,{
-                    flipY:true
+                    flipY:animationFlip
                 }),
                 anchor("center"),
                 scale(2),])
-            }else{
-                enemyBullet.add([
-                sprite(this.bulletSprite),
-                anchor("center"),
-                scale(2),])
-            }
-            
             if(enemyBullet.pos.y>1024){
                 enemyBullet.destroy();
             }else if(enemyBullet.pos.y<-64){
                 enemyBullet.destroy();
             }
-            if(this.direction==="up"){
-                tween(
-                enemyBullet.pos.y-BulletOffset,
-                -64-50,
-                bulletSpeed,
-                (val) => enemyBullet.pos.y = val,
-                easings.linear);
+            if(this.direction===1){
+                loop(rateOfFire,()=>{
+                    enemyBullet.moveBy(0,-5);
+                })
             }else{
-                if(enemyBullet.pos.y>750){
-                    bulletSpeed=1;
-                };
-                tween(
-                enemyBullet.pos.y+BulletOffset,
-                1024,
-                bulletSpeed,
-                (val) => enemyBullet.pos.y = val,
-                easings.linear);
+                loop(rateOfFire,()=>{
+                    enemyBullet.moveBy(0,5);
+                })
             }
             enemyBullet.onCollide("player",()=>{
                 enemyBullet.destroy()
@@ -124,9 +115,9 @@ export class Enemy{
     };
     livePack(){
         let livepack=add([
-            "health",
+            "healthPack",
             pos(this.enemyObj.pos.x, this.enemyObj.pos.y),
-            sprite("healtPickup",{anim:"default"}),
+            sprite("healthPickup",{anim:"default"}),
             scale(3),
             area()
         ])
@@ -137,26 +128,56 @@ export class Enemy{
             livepack.destroy();
         })
     }
+    ammoPack(){
+        let ammoPack=add([
+            "ammoPack",
+            pos(this.enemyObj.pos.x, this.enemyObj.pos.y),
+            sprite("ammoPickUp",{anim:"default"}),
+            area()
+        ])
+        ammoPack.onCollide("player",()=>{
+            ammoPack.destroy();
+        })
+        wait(6,()=>{
+            ammoPack.destroy();
+        })
+    }
     destroyEnemy(){
         this.enemyObj.onCollide("bulletPlayer",()=>{
+            this.enemySprite.play("damage");
+            wait(1,()=>{
+                this.enemySprite.play("default");
+            })
+            play("enemyHit");
             this.hits--
             if(this.hits===0){
                 if (this.onDeath) this.onDeath();
+                play("fighterDie",{volume:0.8});
                 this.enemyObj.destroy();
-                let chanceToDrop=Math.floor(Math.random()*4);
-                if(chanceToDrop===1){
+                let chanceToDrop=Math.floor(Math.random()*5);
+                if(chanceToDrop===2){
                     this.livePack();
+                }else if(chanceToDrop===1){
+                    this.ammoPack();
                 }
             }
         });
         this.enemyObj.onCollide("player",()=>{
+            this.enemySprite.play("damage");
+            wait(1,()=>{
+                this.enemySprite.play("default");
+            })
+            play("enemyHit");
             this.hits--
             if(this.hits===0){
                 if (this.onDeath) this.onDeath();
+                play("fighterDie",{volume:0.8});;
                 this.enemyObj.destroy();
-                let chanceToDrop=Math.floor(Math.random()*4);
-                if(chanceToDrop===1){
+                let chanceToDrop=Math.floor(Math.random()*5);
+                if(chanceToDrop===2){
                     this.livePack();
+                }else if(chanceToDrop===1){
+                    this.ammoPack();
                 }
             }
         });
@@ -175,8 +196,13 @@ export class Enemy{
         };
         startTween();
         this.enemyObj.onCollide("borderDown",()=>{
+            this.hits=3;
             this.enemyObj.pos.y = 0;
-            this.enemyObj.pos.x = Math.floor(Math.random() * (800 - 100) + 100);
+            if(this.enemyObj.pos.x>=820){
+                this.enemyObj.pos.x=100;
+            }else{
+                this.enemyObj.pos.x+=100;
+            }
             startTween(); // Restart movement after respawn
         });
     }
@@ -194,8 +220,13 @@ export class Enemy{
         };
         startTween();
         this.enemyObj.onCollide("borderUp",()=>{
+            this.hits=3;
             this.enemyObj.pos.y = 960;
-            this.enemyObj.pos.x = Math.floor(Math.random() * (800 - 100) + 100);
+            if(this.enemyObj.pos.x>=820){
+                this.enemyObj.pos.x=100;
+            }else{
+                this.enemyObj.pos.x+=100;
+            }
             startTween(); // Restart movement after respawn
         });
     }
