@@ -16,11 +16,18 @@ export const loadItalians =()=>{
     });
     loadSprite("cr31Bullet","src/sprites/level1/cr31Bullet.png");
 }
-export const loadPlayer=()=>{
+export const loadPlayerLvl1=()=>{
     loadSprite("i-16","src/sprites/level1/I-16 Spain.png",{
         sliceX:3, sliceY:2, anims:{default:{from:0,to:1,loop:true}, damage:{from:1,to:5,loop:false}}
     });
     loadSprite("i16Bullet","src/sprites/level1/i16 bullets.png");
+}
+export const loadPlayerLvl3=()=>{
+    loadSprite("i-16","src/sprites/level1/I-16 Spain.png",{
+        sliceX:3, sliceY:2, anims:{default:{from:0,to:1,loop:true}, damage:{from:1,to:5,loop:false}}
+    });
+    loadSprite("i16Bullet","src/sprites/level1/i16 bullets.png");
+    loadSprite("gunnerSight","src/sprites/level3/gunnerSight.png");
 }
 export const loadPickUpables=()=>{
     loadSprite("healthPickup","src/sprites/healthPickup.png",{
@@ -31,9 +38,12 @@ export const loadPickUpables=()=>{
     });
 }
 export const loadLevel1=()=>{
-    loadSprite("staticBG","src/sprites/level1/staticBG.png");
-    loadSprite("cloudsBG","src/sprites/level1/cloudsBG.png");
-    loadSprite("greeneryBG","src/sprites/level1/greeneryBG.png");
+    loadSprite("tempStaticBg","src/sprites/level1/tempStaticBg.png");
+    loadSprite("tempBg","src/sprites/level1/tempBg.png");
+}
+export const loadLevel3=()=>{
+    loadSprite("tempStaticBg","src/sprites/level1/tempStaticBg.png");
+    loadSprite("tempBg","src/sprites/level1/tempBg.png");
 }
 export const loadUi=()=>{
     loadFont("yoster","src/fonts/yoster.ttf");

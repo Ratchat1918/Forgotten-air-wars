@@ -24,9 +24,7 @@ export const victoryScreen=(level)=>{
     ])
     mainMenu.add([anchor("center"),text("Go to main menu",{size:24,}),color(0,0,0)])
     onClick("nextLevel",()=>{
-        if(level<3){
-            go(level+1);
-        }
+        go("level3")
     })
     onClick("palyAgain",()=>{
         go("level1")

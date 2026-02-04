@@ -15,6 +15,6 @@ startBtn.add([
     color(0,0,0)
 ])
 onClick("startBtn",()=>{
-    go("level1")
+    go("level3")
 })
 }

@@ -1,11 +1,11 @@
-import { loadGermans, loadItalians, loadPlayer, loadPickUpables, loadLevel1 } from "../services/loader.js";
+import { loadGermans, loadItalians, loadPlayerLvl1, loadPickUpables, loadLevel1 } from "../services/loader.js";
 import { Player } from "../enteties/player";
 import { Enemy } from "../enteties/enemy";
 import { Transport } from "../enteties/transport";
 
 export const level1=()=>{
     loadLevel1();
-    loadPlayer();
+    loadPlayerLvl1();
     loadGermans();
     loadItalians();
     loadPickUpables();
@@ -49,59 +49,32 @@ export const level1=()=>{
         "borderRight"
     ]);
     const renderBackground=()=>{//infinite parallax background:]]]]
-        let staticBG=add([
-            sprite("staticBG"),
-            "staticBG",
-            scale(2),
+        let tempStaticBg=add([
+            sprite("tempStaticBg"),
+            "tempStaticBg",
+            scale(3),
             pos(0,0),
             layer("staticBackground")
         ]);
-        let cloudsBG=add([
-            sprite("cloudsBG"),
-            "cloudsBG",
-            scale(2),
+        let tempBg=add([
+            sprite("tempBg"),
+            "tempBg",
+            scale(3),
             pos(0,0),
             layer("background3")
         ]);
-        let cloudsBG2=add([
-            sprite("cloudsBG"),
-            "cloudsBG",
-            scale(2),
-            pos(0,-960),
-            layer("background3")
-        ]);
-        let greeneryBG=add([
-            sprite("greeneryBG"),
-            "greeneryBG",
-            scale(2),
-            pos(0,-960),
-            layer("background2")
-        ]);
         loop(0.04,()=>{
-            if(cloudsBG.pos.y>=960){
-                cloudsBG.destroy();
-                cloudsBG = add([
-                    sprite("cloudsBG"),
-                    "cloudsBG",
-                    scale(2),
+            if(tempBg.pos.y>=960){
+                tempBg.destroy();
+                tempBg = add([
+                    sprite("tempBg"),
+                    "tempBg",
+                    scale(3),
                     pos(0,-960),
                     layer("background2")
                 ]);
             }
-            if(greeneryBG.pos.y>=960){
-                greeneryBG.destroy();
-                greeneryBG = add([
-                    sprite("greeneryBG"),
-                    "greeneryBG",
-                    scale(2),
-                    pos(0,-960),
-                    layer("background2")
-                ]);
-            }
-
-            cloudsBG.moveBy(0,6);
-            cloudsBG2.moveBy(0,6);
-            greeneryBG.moveBy(0,4);
+            tempBg.moveBy(0,6);
         });
     }
     renderBackground();

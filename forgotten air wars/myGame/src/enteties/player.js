@@ -10,10 +10,15 @@ export class Player{
         this.borderDown=borderDown;
         this.borderLeft=borderLeft;
         this.borderRight=borderRight;
+        this.gunnerPos="down";
         this.bulletCleanUp();
         this.makePlayer();
         this.setPlayerControls();
         this.playerShoot();
+        if(this.sprite=="i-16"){
+            this.gunnerShoot();
+            this.shootbomb();
+        }
         this.playerDeath()
     }
     makePlayer(){
@@ -32,13 +37,23 @@ export class Player{
             anchor("center"),
             scale(2)
         ])
-    };
+        this.playerGunner=this.playerObj.add([
+            sprite("gunnerSight"),
+            pos(-30,100),
+            scale(2),
+            opacity(0),])
+            if(this.sprite=="i-16"){
+                this.playerGunner.opacity=1;
+            }
+        };
+        
     playerShoot(){
         let lastShotTime = 0;
         const shootCooldown = 350; // milliseconds
         let rateOfFire=0.04;
         let bulletSpeed=-50;
         let ammoFrame;
+        const bulletDeathList=["borderUp","borderDown", "borderRight", "borderLeft", "enemy", "transport"];
         if(this.ammo===50){
             ammoFrame=11;
         }else{
@@ -87,21 +102,168 @@ export class Player{
                 loop(rateOfFire,()=>{
                     bullet.moveBy(0,bulletSpeed);
                 })
-                bullet.onCollide("enemy",()=>{
-                    bullet.destroy()
-                })
-                bullet.onCollide("transport",()=>{
-                    bullet.destroy()
-                })
-                bullet.onCollide("transport",()=>{
-                    bullet.destroy()
-                })
-                bullet.onCollide("borderUp",()=>{
-                    bullet.destroy();
-                })
+                bulletDeathList.forEach(element => {
+                    bullet.onCollide(element,()=>{
+                        bullet.destroy();
+                    })
+                });
                 lastShotTime = now;
             }
         });
+    }
+    gunnerShoot(){
+        let lastShotTime = 0;
+        const shootCooldown = 350; // milliseconds
+        let rateOfFire=0.04;
+        const bulletDeathList=["borderUp","borderDown", "borderRight", "borderLeft", "enemy", "transport"];
+        onKeyDown("down", () => {
+            this.playerGunner.destroy();
+            this.playerGunner=this.playerObj.add([
+                sprite("gunnerSight"),
+                pos(-30,100),
+                scale(2),
+                opacity(1),
+            ])
+            const now = Date.now();
+            if (now - lastShotTime >= shootCooldown && this.ammo > 0) {
+                let bullet = add([
+                    rect(100,10),
+                    pos(this.playerObj.pos.x , this.playerObj.pos.y + 48),
+                    area(),
+                    body(),
+                    "bulletPlayer",
+                    opacity(0),
+                    anchor("center"),
+                    offscreen({destroy:true}),
+                ]);
+                bullet.add([
+                    sprite("i16Bullet",{flipY:true}),
+                    scale(2),
+                    anchor("center")
+                ])
+                play("playerShoot");
+                loop(rateOfFire,()=>{
+                    bullet.moveBy(0,50);
+                })
+                bulletDeathList.forEach(element => {
+                    bullet.onCollide(element,()=>{
+                        bullet.destroy();
+                    })
+                });
+                lastShotTime = now;
+            }
+        });
+        onKeyDown("left", () => {
+            this.playerGunner.destroy();
+            this.playerGunner=this.playerObj.add([
+                sprite("gunnerSight"),
+                pos(-200,10),
+                scale(2),
+                opacity(1),
+            ])
+            const now = Date.now();
+            if (now - lastShotTime >= shootCooldown && this.ammo > 0) {
+                let bullet = add([
+                    rect(100,10),
+                    pos(this.playerObj.pos.x-100 , this.playerObj.pos.y+30),
+                    area(),
+                    body(),
+                    "bulletPlayer",
+                    opacity(0),
+                    anchor("center"),
+                    offscreen({destroy:true}),
+                ]);
+                bullet.add([
+                    sprite("i16Bullet",{flipX:true}),
+                    scale(2),
+                    anchor("center")
+                ])
+                play("playerShoot");
+                loop(rateOfFire,()=>{
+                    bullet.moveBy(-50,0);
+                })
+                bulletDeathList.forEach(element => {
+                    bullet.onCollide(element,()=>{
+                        bullet.destroy();
+                    })
+                });
+                lastShotTime = now;
+            }
+        });
+        onKeyDown("right", () => {
+            this.playerGunner.destroy();
+            this.playerGunner=this.playerObj.add([
+                sprite("gunnerSight"),
+                pos(150,10),
+                scale(2),
+                opacity(1),
+            ])
+            const now = Date.now();
+            if (now - lastShotTime >= shootCooldown && this.ammo > 0) {
+                let bullet = add([
+                    rect(100,10),
+                    pos(this.playerObj.pos.x+100 , this.playerObj.pos.y+30),
+                    area(),
+                    body(),
+                    "bulletPlayer",
+                    opacity(0),
+                    anchor("center"),
+                    offscreen({destroy:true}),
+                ]);
+                bullet.add([
+                    sprite("i16Bullet",{flipX:true}),
+                    scale(2),
+                    anchor("center")
+                ])
+                play("playerShoot");
+                loop(rateOfFire,()=>{
+                    bullet.moveBy(50,0);
+                })
+                bulletDeathList.forEach(element => {
+                    bullet.onCollide(element,()=>{
+                        bullet.destroy();
+                    })
+                });
+                lastShotTime = now;
+            }
+        });
+    }
+    shootbomb(){
+       const bombDeathList=["borderUp","borderDown", "borderRight", "borderLeft","bt5","t26","t28"];
+       onKeyPress("e", () => {
+            let lastShotTime = 0;
+            const shootCooldown = 350;
+            const now = Date.now();
+            if (now - lastShotTime >= shootCooldown && this.ammo > 0) {
+                let bomb = add([
+                    rect(32,32),
+                    pos(this.playerObj.pos.x , this.playerObj.pos.y-50),
+                    area(),
+                    "bomb",
+                    anchor("center"),
+                    offscreen({destroy:true}),
+                ]);
+                let y=0;
+                play("playerShoot");
+                loop(0.03,()=>{
+                    if(y<=100){
+                        bomb.moveBy(0,-10);
+                        y+=10;
+                    };
+                });
+                wait(0.5,()=>{
+                    if(bomb.exists()){
+                        bomb.destroy();
+                    }
+                })
+                bombDeathList.forEach(element => {
+                    bomb.onCollide(element,()=>{
+                        bomb.destroy();
+                    })
+                });
+                lastShotTime = now;
+            }
+        }); 
     }
     playerDeath(){
         let livesUi=add([
